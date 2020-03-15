@@ -7,11 +7,15 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class HttpService {
   dataSub: BehaviorSubject<any>;
-  api = "https://mutualmemories.herokuapp.com/sc"
+  api = "https://mutualmemories.herokuapp.com"
+  // api = "http://localhost:3000"
   constructor(private http: HttpClient) { }
 
   getCountries(){
-    return this.http.get(this.api);
+    return this.http.get(this.api+"/sc");
   }
 
+  getNumbers(){
+ return   this.http.get(this.api+"/nums")
+  }
 }

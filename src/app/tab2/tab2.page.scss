@@ -1,3 +1,20 @@
 ion-content ion-toolbar {
-  --background: translucent;
+    --background: translucent;
+}
+
+ion-card-title {
+    font-size: 30px;
+}
+
+ion-card {
+    background: rgb(131, 58, 180);
+    background: linear-gradient(90deg, rgba(131, 58, 180, 0.3113620448179272) 0%, rgba(253, 29, 29, 0.40940126050420167) 50%, rgba(252, 176, 69, 0.2637429971988795) 100%);
+}
+
+ion-toolbar {
+    --background: #ffbfbf;
+}
+
+ion-card-subtitle {
+    color: black !important;
 }

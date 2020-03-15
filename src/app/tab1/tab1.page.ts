@@ -5,8 +5,8 @@ import { Map, geoJSON, GeoJSONOptions, GeoJSON } from "leaflet";
 import { HttpClient } from "@angular/common/http";
 import { HttpService } from "../Services/http.service";
 import { AdMobFree, AdMobFreeBannerConfig } from "@ionic-native/admob-free/ngx";
-import { StoreService } from '../Services/store.service';
-import { LoadingController } from '@ionic/angular';
+import { StoreService } from "../Services/store.service";
+import { LoadingController, Platform } from "@ionic/angular";
 
 @Component({
   selector: "app-tab1",
@@ -16,6 +16,7 @@ import { LoadingController } from '@ionic/angular';
 export class Tab1Page implements OnInit {
   map: Map;
   jsn;
+  isInit = true;
   countries: Array<any>;
   newMarker: any;
   address: string[];
@@ -25,23 +26,29 @@ export class Tab1Page implements OnInit {
     private admobFree: AdMobFree,
     private zone: NgZone,
     private store: StoreService,
-    private loading: LoadingController
-    ) {}
+    private loading: LoadingController,
+    private platform: Platform
+  ) {}
   ngOnInit() {
-    const bannerConfig: AdMobFreeBannerConfig = {
-      autoShow: true,
-      id: "ca-app-pub-2213555762660469/3823241819"
-    };
-    this.admobFree.banner.config(bannerConfig);
 
-    this.admobFree.banner
-      .prepare()
-      .then(() => {})
-      .catch(e => console.log(e));
+
   }
 
   ionViewWillEnter() {
     console.log("will enter");
+    this.platform.ready().then(()=>{
+      console.log("oninit")
+      const bannerConfig: AdMobFreeBannerConfig = {
+        autoShow: true,
+        id: "ca-app-pub-2213555762660469/3823241819"
+      };
+      this.admobFree.banner.config(bannerConfig);
+  
+      this.admobFree.banner
+        .prepare()
+        .then(() => {console.log("show ad")})
+        .catch(e => console.log(e));
+    })
     this.loadMap();
   }
   //   var geojsonFeature = {
@@ -57,16 +64,16 @@ export class Tab1Page implements OnInit {
   // };
 
   async loadMap() {
-if (!this.map){
-  this.map = new Map("mapId3").setView([17.385, 78.4867], 3);
+    if (this.isInit) {
+      this.map = new Map("mapId3").setView([17.385, 78.4867], 3);
+      this.isInit = false;
+    } else {
+      this.map.remove();
+      this.map = new Map("mapId3").setView([17.385, 78.4867], 3);
+    }
 
-}
-
-  
- 
     this.presentLoading();
     await this.httpService.getCountries().subscribe((d: Array<any>) => {
-  
       console.log("ddd ", d);
       this.countries = d.filter(el => {
         return el.Country != "";
@@ -132,11 +139,12 @@ if (!this.map){
         return e.properties.Total_Cases != undefined;
       });
 
-      console.log("after map ",this.jsn);
+      console.log("after map ", this.jsn);
       this.store.setCountries(this.jsn);
       // this.httpService.dataSub = this.jsn.properties;
-     localStorage.setItem("countries",this.jsn);
-      L.geoJSON(this.jsn, {
+      localStorage.setItem("countries", this.jsn);
+
+      let jsonLayer = L.geoJSON(this.jsn, {
         style: function(feature) {
           if (feature.properties.Total_Cases > 1000) {
             return { color: "#FF0000", weight: 0 };
@@ -237,7 +245,6 @@ if (!this.map){
     });
 
     await this.http.get(".././../assets/countries.geojson").subscribe(s => {
-
       this.jsn = s;
     });
     // console.log(json);
@@ -275,7 +282,6 @@ if (!this.map){
         fillOpacity: 0.7
       };
     }
-   
   }
   getColor(d) {
     return d > 1000
@@ -296,14 +302,12 @@ if (!this.map){
   }
   async presentLoading() {
     const loading = await this.loading.create({
-      message: 'Updating Records...',
+      message: "Updating Records...",
       duration: 3000
-      
     });
     await loading.present();
 
     const { role, data } = await loading.onDidDismiss();
-    console.log('Loading dismissed!');
+    console.log("Loading dismissed!");
   }
-
 }

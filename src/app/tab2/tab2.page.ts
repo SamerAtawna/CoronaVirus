@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { HttpService } from '../Services/http.service';
 
 @Component({
   selector: 'app-tab2',
@@ -7,6 +8,14 @@ import { Component } from '@angular/core';
 })
 export class Tab2Page {
 
-  constructor() {}
+  nums;
+  constructor(private httpService: HttpService) {}
+
+  ionViewWillEnter(){
+    this.httpService.getNumbers().subscribe(num=>{
+      console.log(num);
+      this.nums = num;
+    })
+  }
 
 }

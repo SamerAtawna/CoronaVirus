@@ -79,9 +79,7 @@
         "ANDROID_SUPPORT_ANNOTATIONS_VERSION": "27.+"
       },
       "cordova-plugin-ionic-keyboard": {},
-      "cordova-plugin-admob-free": {
-        "ADMOB_APP_ID": "ca-app-pub-2213555762660469~3030062565"
-      }
+      "cordova-plugin-admob-free": {}
     },
     "platforms": [
       "android"
