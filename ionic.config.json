@@ -1,5 +1,7 @@
 {
   "name": "corona",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }
