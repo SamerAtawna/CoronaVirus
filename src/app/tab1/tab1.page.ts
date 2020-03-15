@@ -1,10 +1,12 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, NgZone } from "@angular/core";
 import * as L from "leaflet";
 import { Map, geoJSON, GeoJSONOptions, GeoJSON } from "leaflet";
 // import* as a from ''
 import { HttpClient } from "@angular/common/http";
 import { HttpService } from "../Services/http.service";
 import { AdMobFree, AdMobFreeBannerConfig } from "@ionic-native/admob-free/ngx";
+import { StoreService } from '../Services/store.service';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: "app-tab1",
@@ -20,22 +22,22 @@ export class Tab1Page implements OnInit {
   constructor(
     private http: HttpClient,
     private httpService: HttpService,
-    private admobFree: AdMobFree
-  ) {}
+    private admobFree: AdMobFree,
+    private zone: NgZone,
+    private store: StoreService,
+    private loading: LoadingController
+    ) {}
   ngOnInit() {
     const bannerConfig: AdMobFreeBannerConfig = {
       autoShow: true,
       id: "ca-app-pub-2213555762660469/3823241819"
-     };
-     this.admobFree.banner.config(bannerConfig);
-     
-     this.admobFree.banner.prepare()
-       .then(() => {
+    };
+    this.admobFree.banner.config(bannerConfig);
 
-       })
-       .catch(e => console.log(e));
-     
-    
+    this.admobFree.banner
+      .prepare()
+      .then(() => {})
+      .catch(e => console.log(e));
   }
 
   ionViewWillEnter() {
@@ -55,8 +57,16 @@ export class Tab1Page implements OnInit {
   // };
 
   async loadMap() {
-    this.map = new Map("mapId3").setView([17.385, 78.4867], 3);
+if (!this.map){
+  this.map = new Map("mapId3").setView([17.385, 78.4867], 3);
+
+}
+
+  
+ 
+    this.presentLoading();
     await this.httpService.getCountries().subscribe((d: Array<any>) => {
+  
       console.log("ddd ", d);
       this.countries = d.filter(el => {
         return el.Country != "";
@@ -68,7 +78,7 @@ export class Tab1Page implements OnInit {
         if (el.Country == " Palestine ") {
           el.Country = " West Bank ";
         }
-        
+
         el.Country = el.Country;
         el.Total_Cases = el.Total_Cases.replace(/\s|,|\+/g, "");
         el.New_Cases = el.New_Cases.replace(/\s|,|\+/g, "");
@@ -101,8 +111,6 @@ export class Tab1Page implements OnInit {
           (el.Critical = parseInt(el.Critical))
         );
       });
-      setTimeout(() => {
-      }, 3000);
 
       this.jsn.features.forEach(element => {
         let currCountry = this.countries.find(w => {
@@ -124,7 +132,10 @@ export class Tab1Page implements OnInit {
         return e.properties.Total_Cases != undefined;
       });
 
-      console.log("after map ", this.jsn);
+      console.log("after map ",this.jsn);
+      this.store.setCountries(this.jsn);
+      // this.httpService.dataSub = this.jsn.properties;
+     localStorage.setItem("countries",this.jsn);
       L.geoJSON(this.jsn, {
         style: function(feature) {
           if (feature.properties.Total_Cases > 1000) {
@@ -226,6 +237,7 @@ export class Tab1Page implements OnInit {
     });
 
     await this.http.get(".././../assets/countries.geojson").subscribe(s => {
+
       this.jsn = s;
     });
     // console.log(json);
@@ -263,6 +275,7 @@ export class Tab1Page implements OnInit {
         fillOpacity: 0.7
       };
     }
+   
   }
   getColor(d) {
     return d > 1000
@@ -281,4 +294,16 @@ export class Tab1Page implements OnInit {
       ? "#FED976"
       : "#FFEDA0";
   }
+  async presentLoading() {
+    const loading = await this.loading.create({
+      message: 'Updating Records...',
+      duration: 3000
+      
+    });
+    await loading.present();
+
+    const { role, data } = await loading.onDidDismiss();
+    console.log('Loading dismissed!');
+  }
+
 }
