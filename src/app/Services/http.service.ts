@@ -12,6 +12,7 @@ export class HttpService {
   constructor(private http: HttpClient) { }
 
   getCountries(){
+    console.log("getCOuntries service")
     return this.http.get(this.api+"/sc");
   }
 

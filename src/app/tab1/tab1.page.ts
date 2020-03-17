@@ -64,6 +64,7 @@ export class Tab1Page implements OnInit {
   // };
 
   async loadMap() {
+    console.log("loadMap");
     if (this.isInit) {
       this.map = new Map("mapId3").setView([17.385, 78.4867], 3);
       this.isInit = false;
@@ -74,6 +75,8 @@ export class Tab1Page implements OnInit {
 
     this.presentLoading();
     await this.httpService.getCountries().subscribe((d: Array<any>) => {
+      console.log("getCountries subscribe");
+      this.loading.dismiss();
       console.log("ddd ", d);
       this.countries = d.filter(el => {
         return el.Country != "";
@@ -96,6 +99,7 @@ export class Tab1Page implements OnInit {
         el.Critical = el.Critical.replace(/\s|,|\+/g, "");
       });
       this.countries.map(el => {
+        console.log("countires map")
         return (
           el.Total_Cases != ""
             ? (el.Total_Cases = parseInt(el.Total_Cases))
@@ -134,6 +138,7 @@ export class Tab1Page implements OnInit {
           element.properties.Critical = currCountry.Critical;
         }
         // console.log(currCountry)
+        console.log("jsn.featues.foreach")
       });
       this.jsn.features.filter(e => {
         return e.properties.Total_Cases != undefined;
@@ -145,6 +150,7 @@ export class Tab1Page implements OnInit {
       localStorage.setItem("countries", this.jsn);
 
       let jsonLayer = L.geoJSON(this.jsn, {
+        
         style: function(feature) {
           if (feature.properties.Total_Cases > 1000) {
             return { color: "#FF0000", weight: 0 };
@@ -245,6 +251,7 @@ export class Tab1Page implements OnInit {
     });
 
     await this.http.get(".././../assets/countries.geojson").subscribe(s => {
+      console.log("sunscribe geojson");
       this.jsn = s;
     });
     // console.log(json);
@@ -301,9 +308,9 @@ export class Tab1Page implements OnInit {
       : "#FFEDA0";
   }
   async presentLoading() {
+    console.log("present");
     const loading = await this.loading.create({
       message: "Updating Records...",
-      duration: 3000
     });
     await loading.present();
 
